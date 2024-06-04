@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             .unwrap_or(0);
 
         println!("User count: {}", user_count);
-        if user_count > 10 && !alert_sent {
+        if user_count > 50 && !alert_sent {
             send_discord_alert(user_count)?;
             alert_sent = true;
             println!("Discord Webhook sent. alert_sent: {}", alert_sent);
@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         // Sleep for 5 minutes
-        thread::sleep(Duration::from_secs(5 * 60));
+        thread::sleep(Duration::from_secs(3 * 60));
     }
 }
 
