@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("Discord Webhook sent. alert_sent: {}", alert_sent);
         } else if user_count < 50 {
             alert_sent = false;
-            println!("Usercount below 10. user_count: {}, alert_sent: {}", user_count, alert_sent);
+            println!("Usercount below 50. user_count: {}, alert_sent: {}", user_count, alert_sent);
         }
 
         // Sleep for 5 minutes
