@@ -45,16 +45,9 @@ fn send_discord_alert(user_count: u64) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
     let webhook_url = std::env::var("WEBHOOK_URL").expect("WEBHOOK_URL must be set");
     let payload = json!({
-        "content": format!("ConkDetects is live with {} viewers", user_count),
-        "embeds": [
-            {
-                "title": "@ConkDetects is live, YEAH!",
-                "description": "https://www.tiktok.com/@conkdetects/live",
-                "color": "#3368703"
-            }
-        ]
+        "content": format!("ConkDetects is live with {} viewers: https://www.tiktok.com/@conkdetects/live", user_count),
     });
-    client.post(webhook_url).json(&payload).send()?;
-
+    let response = client.post(webhook_url).json(&payload).send()?;
+    println!("Response: {:?}", response);
     Ok(())
 }
