@@ -1,6 +1,6 @@
 use std::error::Error;
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
 
 use reqwest::blocking::Client;
 use scraper::{Html, Selector};
@@ -8,6 +8,8 @@ use serde_json::json;
 use serde_json::Value;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    simple_logger::init_with_level(log::Level::Info).unwrap();
+
     let mut alert_sent = false;
 
     loop {
@@ -26,17 +28,22 @@ fn main() -> Result<(), Box<dyn Error>> {
             .as_u64()
             .unwrap_or(0);
 
-        println!("User count: {}", user_count);
+        log::info!("User count: {}", user_count);
+
         if user_count > 50 && !alert_sent {
             send_discord_alert(user_count)?;
             alert_sent = true;
-            println!("Discord Webhook sent. alert_sent: {}", alert_sent);
+            log::info!("Discord Webhook sent. alert_sent: {}", alert_sent);
         } else if user_count < 50 {
             alert_sent = false;
-            println!("Usercount below 50. user_count: {}, alert_sent: {}", user_count, alert_sent);
+            log::info!(
+                "Usercount below 50. user_count: {}, alert_sent: {}",
+                user_count,
+                alert_sent
+            );
         }
 
-        // Sleep for 5 minutes
+        // Sleep for 3 minutes
         thread::sleep(Duration::from_secs(3 * 60));
     }
 }
@@ -48,6 +55,6 @@ fn send_discord_alert(user_count: u64) -> Result<(), Box<dyn Error>> {
         "content": format!("ConkDetects is live with {} viewers: https://www.tiktok.com/@conkdetects/live", user_count),
     });
     let response = client.post(webhook_url).json(&payload).send()?;
-    println!("Response: {:?}", response);
+    log::info!("Response: {:?}", response);
     Ok(())
 }
