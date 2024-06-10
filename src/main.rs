@@ -11,7 +11,7 @@ fn main() {
     simple_logger::init_with_level(log::Level::Info).unwrap();
 
     let mut alert_sent = false;
-
+    log::info!("Initializing: alert_sent: {}", alert_sent);
     loop {
         match get_user_count() {
             Ok(user_count) => {
