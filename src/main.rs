@@ -15,8 +15,6 @@ fn main() {
     loop {
         match get_user_count() {
             Ok(user_count) => {
-                log::info!("User count: {}", user_count);
-
                 if user_count > 50 && !alert_sent {
                     if let Err(e) = send_discord_alert(user_count) {
                         log::error!("Failed to send discord alert: {}", e);
