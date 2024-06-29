@@ -51,14 +51,24 @@ fn get_user_count() -> Result<u64, Box<dyn Error>> {
         let body = response.text()?;
         let document = Html::parse_document(&body);
         let script_selector = Selector::parse(r#"script[id="SIGI_STATE"]"#).unwrap();
-        let script_element = document.select(&script_selector).next().unwrap();
-        let json_str = script_element.text().collect::<String>();
-        let parsed: Value = serde_json::from_str(&json_str)?;
-        let user_count = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["liveRoomStats"]
-            ["userCount"]
-            .as_u64()
-            .unwrap_or(0);
-        Ok(user_count)
+        // Rust crashes here if `document.select(&script_selector).next()` returns None
+        // check if document.select(&script_selector).next() is None
+        if document.select(&script_selector).next().is_none() {
+            log::warn!("Script element not found");
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Script element not found",
+            )));
+        } else {
+            let script_element = document.select(&script_selector).next().unwrap();
+            let json_str = script_element.text().collect::<String>();
+            let parsed: Value = serde_json::from_str(&json_str)?;
+            let user_count = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["liveRoomStats"]
+                ["userCount"]
+                .as_u64()
+                .unwrap_or(0);
+            Ok(user_count)
+        }
     } else if response.status().is_client_error() {
         // Handle client error (4xx)
         log::warn!("400 from Server: Response: {:?}", response);
