@@ -26,7 +26,7 @@ fn main() {
                 } else if user_count < 50 {
                     alert_sent = false;
                     log::info!(
-                        "Usercount below 50. user_count: {}, alert_sent: {}",
+                        "User count below 50. user_count: {}, alert_sent: {}",
                         user_count,
                         alert_sent
                     );
@@ -38,7 +38,7 @@ fn main() {
         }
 
         // Sleep for 3 minutes
-        thread::sleep(Duration::from_secs(3 * 60));
+        thread::sleep(Duration::from_secs(30 * 60));
     }
 }
 fn get_user_count() -> Result<u64, Box<dyn Error>> {
