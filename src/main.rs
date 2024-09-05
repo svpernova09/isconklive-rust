@@ -63,11 +63,23 @@ fn get_user_count() -> Result<u64, Box<dyn Error>> {
             let script_element = document.select(&script_selector).next().unwrap();
             let json_str = script_element.text().collect::<String>();
             let parsed: Value = serde_json::from_str(&json_str)?;
-            let user_count = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["liveRoomStats"]
-                ["userCount"]
+            // if parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["status"]  is 2, then the user is live?
+            let room_status = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["status"]
                 .as_u64()
                 .unwrap_or(0);
-            Ok(user_count)
+            if room_status == 2 {
+                let user_count = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["liveRoomStats"]
+                    ["userCount"]
+                    .as_u64()
+                    .unwrap_or(0);
+                Ok(user_count)
+            } else {
+                log::warn!("Room Status wasn't 2/live?: room_status: {:?}", room_status);
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "Room Status wasn't 2/live?",
+                )));
+            }
         }
     } else if response.status().is_client_error() {
         // Handle client error (4xx)
