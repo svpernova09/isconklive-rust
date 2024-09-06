@@ -14,22 +14,26 @@ fn main() {
     log::info!("Initializing: alert_sent: {}", alert_sent);
     loop {
         match get_user_count() {
-            Ok(user_count) => {
-                log::info!("User count: {}", user_count);
-
-                if user_count > 50 && !alert_sent {
-                    if let Err(e) = send_discord_alert(user_count) {
-                        log::error!("Failed to send discord alert: {}", e);
+            Ok((user_count, room_status)) => {
+                log::info!("User count: {}, Room status: {}", user_count, room_status);
+                if room_status == 2 {
+                    if user_count > 50 && !alert_sent {
+                        if let Err(e) = send_discord_alert(user_count) {
+                            log::error!("Failed to send discord alert: {}", e);
+                        }
+                        alert_sent = true;
+                        log::info!("Discord Webhook sent. alert_sent: {}", alert_sent);
+                    } else if user_count < 50 {
+                        alert_sent = false;
+                        log::info!(
+                            "User count below 50. user_count: {}, alert_sent: {}",
+                            user_count,
+                            alert_sent
+                        );
                     }
-                    alert_sent = true;
-                    log::info!("Discord Webhook sent. alert_sent: {}", alert_sent);
-                } else if user_count < 50 {
+                } else {
                     alert_sent = false;
-                    log::info!(
-                        "User count below 50. user_count: {}, alert_sent: {}",
-                        user_count,
-                        alert_sent
-                    );
+                    log::info!("Room Status wasn't 2/live?: room_status: {:?}", room_status);
                 }
             }
             Err(e) => {
@@ -41,7 +45,7 @@ fn main() {
         thread::sleep(Duration::from_secs(10 * 60));
     }
 }
-fn get_user_count() -> Result<u64, Box<dyn Error>> {
+fn get_user_count() -> Result<(u64, u64), Box<dyn Error>> {
     let client = Client::new();
     let response = client
         .get("https://www.tiktok.com/@conkdetects/live")
@@ -63,23 +67,14 @@ fn get_user_count() -> Result<u64, Box<dyn Error>> {
             let script_element = document.select(&script_selector).next().unwrap();
             let json_str = script_element.text().collect::<String>();
             let parsed: Value = serde_json::from_str(&json_str)?;
-            // if parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["status"]  is 2, then the user is live?
             let room_status = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["status"]
                 .as_u64()
                 .unwrap_or(0);
-            if room_status == 2 {
-                let user_count = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["liveRoomStats"]
-                    ["userCount"]
-                    .as_u64()
-                    .unwrap_or(0);
-                Ok(user_count)
-            } else {
-                log::warn!("Room Status wasn't 2/live?: room_status: {:?}", room_status);
-                return Err(Box::new(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    "Room Status wasn't 2/live?",
-                )));
-            }
+            let user_count = parsed["LiveRoom"]["liveRoomUserInfo"]["liveRoom"]["liveRoomStats"]
+                ["userCount"]
+                .as_u64()
+                .unwrap_or(0);
+            Ok((user_count, room_status))
         }
     } else if response.status().is_client_error() {
         // Handle client error (4xx)
