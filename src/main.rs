@@ -17,16 +17,16 @@ fn main() {
             Ok((user_count, room_status)) => {
                 log::info!("User count: {}, Room status: {}", user_count, room_status);
                 if room_status == 2 {
-                    if user_count > 50 && !alert_sent {
+                    if !alert_sent {
                         if let Err(e) = send_discord_alert(user_count) {
                             log::error!("Failed to send discord alert: {}", e);
                         }
                         alert_sent = true;
                         log::info!("Discord Webhook sent. alert_sent: {}", alert_sent);
-                    } else if user_count < 50 {
+                    } else {
                         alert_sent = false;
                         log::info!(
-                            "User count below 50. user_count: {}, alert_sent: {}",
+                            "user_count: {}, alert_sent: {}",
                             user_count,
                             alert_sent
                         );
