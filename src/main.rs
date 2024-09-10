@@ -42,7 +42,7 @@ fn main() {
         }
 
         // Sleep for 3 minutes
-        thread::sleep(Duration::from_secs(10 * 60));
+        thread::sleep(Duration::from_secs(4 * 60));
     }
 }
 fn get_user_count() -> Result<(u64, u64), Box<dyn Error>> {
