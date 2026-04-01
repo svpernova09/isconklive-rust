@@ -49,6 +49,7 @@ fn get_user_count() -> Result<(u64, u64), Box<dyn Error>> {
     let client = Client::new();
     let response = client
         .get("https://www.tiktok.com/@conkdetects/live")
+        .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         .send()?;
     if response.status().is_success() {
         // Process the successful response
