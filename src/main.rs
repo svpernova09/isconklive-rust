@@ -24,9 +24,8 @@ fn main() {
                         alert_sent = true;
                         log::info!("Discord Webhook sent. alert_sent: {}", alert_sent);
                     } else {
-                        alert_sent = false;
                         log::info!(
-                            "user_count: {}, alert_sent: {}",
+                            "Still live. user_count: {}, alert_sent: {}",
                             user_count,
                             alert_sent
                         );
